@@ -9,9 +9,13 @@ import Swal from 'sweetalert2'
 
 Vue.config.productionTip = false;
 Vue.prototype.$http = axios
+Vue.prototype.$http.defaults.headers.common['Authorization'] = 'dbksdjshvdjsgvdhsgdafdhtafda';
+Vue.prototype.$http.defaults.headers.common['Access-Control-Allow-Origin'] = ['*', '192.168.0.117'];
+
 Vue.prototype.$swal = Swal
 
-Vue.prototype.$http.defaults.headers.common['Access-Control-Allow-Origin'] = ['*', '192.168.0.117'];
+import _ from 'lodash';
+Object.defineProperty(Vue.prototype, '$_', { value: _ });
 
 new Vue({
     router,

@@ -9,7 +9,7 @@
                 <strong>Lista de articulos</strong>
               </h4>
             </v-card-title>
-            <v-card-text >
+            <v-card-text>
               <v-simple-table>
                 <template v-slot:default>
                   <thead>
@@ -20,7 +20,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(item, index) in articlesEnMesa" :key="index">
+                    <tr v-for="(item, index) in artList" :key="index">
                       <td>
                         <div class="shop__article__quantity">
                           <div>
@@ -30,7 +30,7 @@
                           </div>
                           <div>
                             <input
-                              v-model="cantidad"
+                              :placeholder="item[0]"
                               class="shop__inp--small text-center white--text"
                               disabled
                               required
@@ -43,7 +43,7 @@
                           </div>
                         </div>
                       </td>
-                      <td class="white--text">{{ item.nombre }}</td>
+                      <td class="white--text">{{ item[1] }}</td>
                       <td>
                         <v-btn color="red" fab x-small dark @click="removeItem(item)">
                           <v-icon>mdi-delete</v-icon>
@@ -112,6 +112,12 @@ export default {
     numcomen: 0,
     cantidad: 0
   }),
+  computed:{
+    artList(){
+      console.log(this.articlesEnMesa)
+      return  this.articlesEnMesa
+    }
+  },
   created() {
     this.familias = JSON.parse(this.$store.getters.getFAMILIAS);
     console.log(this.familias);
@@ -123,7 +129,24 @@ export default {
       this.articulos = fam.json_prod;
     },
     addToMesa(item) {
-      this.articlesEnMesa.push(item);
+      var newarticle = [1,item.nombre,item.precio]
+      console.log(item);
+      if (this.articlesEnMesa.length === 0) {
+        this.articlesEnMesa.push(newarticle);
+      } else {
+        var cont = 0;
+        for (var i in this.articlesEnMesa) {
+          if (
+            this.articlesEnMesa[i][1] === newarticle[1]
+          ) {
+            this.articlesEnMesa[i][0]++
+            cont++;
+          }
+        }
+        if (cont == 0) {
+          this.articlesEnMesa.push(newarticle);
+        }
+      }
     },
     removeItem(item) {
       const index = this.articlesEnMesa.indexOf(item);
