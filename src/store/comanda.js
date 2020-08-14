@@ -2,6 +2,8 @@ export const comanda = {
     state: {
         pisos: null,
         familias: null,
+        mesaActual: null,
+        idMesaActual: null,
     },
     getters: {
         getPISOS: (state) => {
@@ -9,6 +11,12 @@ export const comanda = {
         },
         getFAMILIAS: (state) => {
             return state.familias;
+        },
+        get_MESA_ACTUAL: (state) => {
+            return state.mesaActual;
+        },
+        get_ID_MESA_ACTUAL: (state) => {
+            return state.idMesaActual;
         },
     },
     actions: {},
@@ -18,6 +26,12 @@ export const comanda = {
         },
         SET_FAMILIAS(state, value) {
             state.familias = value;
+        },
+        SET_MESA_ACTUAL(state, value) {
+            state.mesaActual = value;
+        },
+        SET_ID_MESA_ACTUAL(state, value) {
+            state.idMesaActual = value;
         },
     },
     modules: {}

@@ -34,7 +34,7 @@
       <v-col cols="2">
         <v-row>
           <div class="col align-self-start">
-            <div>
+            <div id="inspireme--body--index">
               <v-btn class="ma-2 white--text" tile min-width="8rem" color="black">CREAR</v-btn>
               <v-btn class="ma-2 white--text" tile min-width="8rem" color="black">JUNTAR</v-btn>
               <v-btn class="ma-2 white--text" tile min-width="8rem" color="black">COBRAR</v-btn>
@@ -97,6 +97,7 @@ export default {
     pisoActual: "",
     mesas: "",
     mesaId: "",
+    mesaActual: '',
     pin: "",
     dialog: false,
     numcomen: 0
@@ -122,6 +123,9 @@ export default {
     },
     newComanda(item, index) {
       this.mesaId = index;
+      this.mesaActual = item;
+      this.$store.commit("SET_MESA_ACTUAL", JSON.stringify(item));
+      this.$store.commit("SET_ID_MESA_ACTUAL", index);
       var id = this.$store.getters.getUSERID;
       if (item.st_cmd == "") {
         this.dialog = true;
@@ -161,7 +165,11 @@ export default {
         )
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            this.getMesas(this.pisoActual);
+            console.log(data)
+            //this.getMesas(this.pisoActual);
+            this.mesaActual.id_cmd = data.idcmd
+            this.$store.commit("SET_MESA_ACTUAL", JSON.stringify(this.mesaActual));
+            this.$router.push({ name: "Store" });
             this.dialog = false;
           } else {
             this.$swal.fire({
@@ -188,5 +196,8 @@ export default {
 <style>
 .centered-input input {
   text-align: center;
+}
+#inspireme--body--index {
+  height: 80vh;
 }
 </style>

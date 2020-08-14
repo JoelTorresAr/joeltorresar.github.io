@@ -6,7 +6,7 @@
           <v-card id="inspireme">
             <v-card-title>
               <h4 class="text-center">
-                <strong>Lista de articulos</strong>
+                <strong>{{mesa.nombre}}</strong>
               </h4>
             </v-card-title>
             <v-card-text>
@@ -24,28 +24,29 @@
                       <td>
                         <div class="shop__article__quantity">
                           <div>
-                            <v-btn color="primary" fab x-small dark @click="cantidad--">
+                            <v-btn
+                              color="primary"
+                              fab
+                              x-small
+                              dark
+                              @click="alterList(item,'minus')"
+                            >
                               <v-icon>mdi-minus</v-icon>
                             </v-btn>
                           </div>
                           <div>
-                            <input
-                              :placeholder="item[0]"
-                              class="shop__inp--small text-center white--text"
-                              disabled
-                              required
-                            />
+                            <span class="mr-2 ml-2">{{item.cant}}</span>
                           </div>
                           <div>
-                            <v-btn color="primary" fab x-small dark @click="cantidad++">
+                            <v-btn color="primary" fab x-small dark @click="alterList(item,'plus')">
                               <v-icon>mdi-plus</v-icon>
                             </v-btn>
                           </div>
                         </div>
                       </td>
-                      <td class="white--text">{{ item[1] }}</td>
+                      <td class="white--text">{{ item.name }}</td>
                       <td>
-                        <v-btn color="red" fab x-small dark @click="removeItem(item)">
+                        <v-btn color="red" fab x-small dark  @click="alterList(item,'remove')">
                           <v-icon>mdi-delete</v-icon>
                         </v-btn>
                       </td>
@@ -57,40 +58,49 @@
           </v-card>
         </v-col>
         <v-col cols="8">
-          <v-col cols="12" class="grey lighten-2">
-            <v-slide-group multiple show-arrows>
-              <v-slide-item
-                v-for="(item, index) in familias"
-                :key="index"
-                v-slot:default="{ active }"
-              >
-                <v-btn
-                  class="ma-2 white--text card card-block"
-                  tile
-                  :input-value="active"
-                  color="light-blue darken-4"
-                  @click="getArticles(item)"
-                >{{item.nombre}}</v-btn>
-              </v-slide-item>
-            </v-slide-group>
-          </v-col>
-          <v-card class="d-flex flex-wrap" color="grey lighten-2" flat tile>
-            <v-card
-              v-for="(item, index) in articulos"
-              :key="index"
-              color="orange lighten-4"
-              dark
-              min-width="10rem"
-              max-width="10rem"
-              class="pa-2 mt-4 ml-4"
-              @click="addToMesa(item)"
-            >
-              <v-card-text class="black--text height--item">{{item.nombre}}</v-card-text>
-
-              <v-card-actions class="black">
-                <strong>S/.{{item.precio}}</strong>
-              </v-card-actions>
-            </v-card>
+          <v-card id="inspireme" class="grey lighten-2">
+            <v-card-title>
+             <v-spacer></v-spacer> <v-btn @click="salir"><v-icon>mdi-arrow-left-bold</v-icon></v-btn>
+            </v-card-title>
+            <v-card-title>
+              <v-slide-group multiple show-arrows>
+                <v-slide-item
+                  v-for="(item, index) in familias"
+                  :key="index"
+                  v-slot:default="{ active }"
+                >
+                  <v-btn
+                    class="ma-2 white--text card card-block"
+                    tile
+                    :input-value="active"
+                    color="light-blue darken-4"
+                    @click="getArticles(item)"
+                  >{{item.nombre}}</v-btn>
+                </v-slide-item>
+              </v-slide-group>
+            </v-card-title>
+            <v-card-text id="inspireme--body">
+              <v-card class="d-flex flex-wrap" color="grey lighten-2" flat tile>
+                <v-card
+                  v-for="(item, index) in articulos"
+                  :key="index"
+                  color="orange lighten-4"
+                  dark
+                  min-width="10rem"
+                  max-width="10rem"
+                  class="pa-2 mt-4 ml-4"
+                  @click="addToMesa(item,index)"
+                >
+                  <v-card-text class="black--text height--item">{{item.nombre}}</v-card-text>
+                  <v-card-actions class="black">
+                    <strong>S/.{{item.precio}}</strong>
+                  </v-card-actions>
+                </v-card>
+              </v-card>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="sendKitchen">Imprimir</v-btn>
+            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
@@ -105,22 +115,22 @@ export default {
     familias: "",
     articulos: [],
     articlesEnMesa: [],
-    mesas: "",
+    mesa: "",
     mesaId: "",
     pin: "",
     dialog: false,
     numcomen: 0,
     cantidad: 0
   }),
-  computed:{
-    artList(){
-      console.log(this.articlesEnMesa)
-      return  this.articlesEnMesa
+  computed: {
+    artList() {
+      return this.articlesEnMesa;
     }
   },
   created() {
     this.familias = JSON.parse(this.$store.getters.getFAMILIAS);
-    console.log(this.familias);
+    this.mesa = JSON.parse(this.$store.getters.get_MESA_ACTUAL);
+    this.mesaId = this.$store.getters.get_ID_MESA_ACTUAL;
     this.pin = this.$store.getters.getPIN;
     this.ip = this.$store.getters.getIP;
   },
@@ -128,29 +138,91 @@ export default {
     getArticles(fam) {
       this.articulos = fam.json_prod;
     },
-    addToMesa(item) {
-      var newarticle = [1,item.nombre,item.precio]
-      console.log(item);
-      if (this.articlesEnMesa.length === 0) {
-        this.articlesEnMesa.push(newarticle);
-      } else {
-        var cont = 0;
-        for (var i in this.articlesEnMesa) {
-          if (
-            this.articlesEnMesa[i][1] === newarticle[1]
-          ) {
-            this.articlesEnMesa[i][0]++
-            cont++;
+    addToMesa(item, index) {
+      var userID = this.$store.getters.getUSERID;
+      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${index}&parm_cant=1&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+      console.log('agrego')
+      console.log(url)
+      this.$http
+        .get(url)
+        .then(({ data }) => {
+          if (data.msg == "Ok") {
+            console.log(data)
+            this.articlesEnMesa = data.prod;
+          } else {
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
           }
-        }
-        if (cont == 0) {
-          this.articlesEnMesa.push(newarticle);
-        }
-      }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
-    removeItem(item) {
-      const index = this.articlesEnMesa.indexOf(item);
-      this.articlesEnMesa.splice(index, 1);
+    alterList(item, action) {
+      console.log(item)
+      console.log(action)
+      var userID = this.$store.getters.getUSERID;
+      var cant = 1
+      if(action == 'minus'){
+        cant = -1
+      }
+      if(action == 'remove'){
+         cant = 0
+      }
+      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+      console.log(url)
+      this.$http
+        .get(url)
+        .then(({ data }) => {
+          if (data.msg == "Ok") {
+            console.log(data)
+            this.articlesEnMesa = data.prod;
+          } else {
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    sendKitchen(){
+      var userID = this.$store.getters.getUSERID;
+      var url = `http://192.168.0.2:7000/?nomFun=tb_enviar_cmd&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`
+      this.$http
+        .get(url)
+        .then(({ data }) => {
+          if (data.msg == "OK") {
+            this.$router.push({ name: "Home" });
+            this.$swal.fire({
+              title: "Enviado a cocina!",
+              text: data.msg,
+              icon: "success",
+              confirmButtonText: "Cool"
+            });
+          } else {
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    salir(){
+      this.$router.push({ name: "Home" });
     }
   }
 };
@@ -158,6 +230,9 @@ export default {
 <style>
 #inspireme {
   height: 100vh;
+}
+#inspireme--body {
+  height: 60vh;
 }
 .height--item {
   height: 6rem;

@@ -68,13 +68,22 @@ export default {
           `${this.ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${this.password}&parm_tipo=M$`
         )
         .then(({ data }) => {
+          if(data.status===1){
           this.$store.commit("SET_PIN", this.password);
           this.$store.commit("SET_PISOS", JSON.stringify(data.pisos));
           this.$store.commit("SET_FAMILIAS", JSON.stringify(data.fam));
           this.$store.commit("SET_USER_NAME", data.nombre);
           this.$store.commit("SET_USER_ID", data.id_usr);
-          //console.log(data);
-         this.$router.push({ name: "Home" });
+          this.$router.push({ name: "Home" });
+          }else{
+            this.password = ""
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
+          }
         })
         .catch(error => {
           console.log(error);

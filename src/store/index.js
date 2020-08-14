@@ -10,7 +10,7 @@ import { auth } from './auth';
 import { config } from './config';
 import { comanda } from './comanda';
 const dataState = new createPersistedState({
-    paths: ['auth.pin', 'auth.logginState', 'auth.userName', 'auth.userId', 'store.ip', 'store.server', 'comanda.pisos', 'comanda.familias'],
+    paths: ['auth.pin', 'auth.logginState', 'auth.userName', 'auth.userId', 'store.ip', 'store.server', 'comanda.pisos', 'comanda.familias', 'comanda.mesaActual', 'comanda.idMesaActual'],
     storage: {
         getItem: (key) => ls.get(key),
         setItem: (key, value) => ls.set(key, value),
