@@ -100,7 +100,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn @click="sendKitchen">Imprimir</v-btn>
-              <v-btn @click="sendPreventa">Preventa</v-btn>
+              <v-btn @click="sendPreuenta">Preventa</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -121,7 +121,8 @@ export default {
     pin: "",
     dialog: false,
     numcomen: 0,
-    cantidad: 0
+    cantidad: 0,
+    userID: 0
   }),
   computed: {
     artList() {
@@ -134,14 +135,37 @@ export default {
     this.mesaId = this.$store.getters.get_ID_MESA_ACTUAL;
     this.pin = this.$store.getters.getPIN;
     this.ip = this.$store.getters.getIP;
+    this.userID = this.$store.getters.getUSERID;
+    this.getArticlesinMesa()
   },
   methods: {
     getArticles(fam) {
       this.articulos = fam.json_prod;
     },
+    getArticlesinMesa(){
+      var url = `${this.ip}/?nomFun=tb_item_3p&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`
+      this.$http
+        .get(url)
+        .then(({ data }) => {
+          if (data.msg == "Ok") {
+            console.log("producto en mesa")
+            console.log(data)
+            this.articlesEnMesa = data.prod;
+          } else {
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
     addToMesa(item, index) {
-      var userID = this.$store.getters.getUSERID;
-      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${index}&parm_cant=1&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${index}&parm_cant=1&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {
@@ -162,7 +186,6 @@ export default {
         });
     },
     alterList(item, action) {
-      var userID = this.$store.getters.getUSERID;
       var cant = 1
       if(action == 'minus'){
         cant = -1
@@ -170,7 +193,7 @@ export default {
       if(action == 'remove'){
          cant = 0
       }
-      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {
@@ -190,8 +213,7 @@ export default {
         });
     },
     sendKitchen(){
-      var userID = this.$store.getters.getUSERID;
-      var url = `http://192.168.0.2:7000/?nomFun=tb_enviar_cmd&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`
+      var url = `http://192.168.0.2:7000/?nomFun=tb_enviar_cmd&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`
       this.$http
         .get(url)
         .then(({ data }) => {
@@ -216,9 +238,8 @@ export default {
           console.log(error);
         });
     },
-    sendPreventa(){
-      var userID = this.$store.getters.getUSERID;
-      var url = `${this.ip}/?nomFun=tb_cobrar_mesa&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+    sendPreuenta(){
+      var url = `${this.ip}/?nomFun=tb_cobrar_mesa&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_dade=0&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {

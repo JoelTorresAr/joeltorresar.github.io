@@ -63,20 +63,21 @@ export default {
       this.password = this.password.substring(0, this.password.length - 1);
     },
     loggin() {
+      this.$http.defaults.withCredentials = true;
       this.$http
         .get(
           `${this.ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${this.password}&parm_tipo=M$`
         )
         .then(({ data }) => {
-          if(data.status===1){
-          this.$store.commit("SET_PIN", this.password);
-          this.$store.commit("SET_PISOS", JSON.stringify(data.pisos));
-          this.$store.commit("SET_FAMILIAS", JSON.stringify(data.fam));
-          this.$store.commit("SET_USER_NAME", data.nombre);
-          this.$store.commit("SET_USER_ID", data.id_usr);
-          this.$router.push({ name: "Home" });
-          }else{
-            this.password = ""
+          if (data.status === 1) {
+            this.$store.commit("SET_PIN", this.password);
+            this.$store.commit("SET_PISOS", JSON.stringify(data.pisos));
+            this.$store.commit("SET_FAMILIAS", JSON.stringify(data.fam));
+            this.$store.commit("SET_USER_NAME", data.nombre);
+            this.$store.commit("SET_USER_ID", data.id_usr);
+            this.$router.push({ name: "Home" });
+          } else {
+            this.password = "";
             this.$swal.fire({
               title: "Advertencia!",
               text: data.msg,
@@ -90,20 +91,27 @@ export default {
         });
     },
     loggin2() {
-      fetch(
-        `${this.ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${this.password}&parm_tipo=M$`
-      )
-        .then(response => response.json())
-        .then(({ data }) => {
-          this.$store.commit("SET_PIN", this.password);
-          this.$store.commit("SET_PISOS", JSON.stringify(data.pisos));
-          this.$store.commit("SET_USER_NAME", data.nombre);
-          this.$store.commit("SET_USER_ID", data.id_usr);
-          console.log(data);
-          this.$router.push({ name: "Home" });
+      this.$axios.defaults.withCredentials = true;
+      this.$axios.defaults.withCredentials = true;
+
+      this.$axios.defaults.headers.common = {
+        'Access-Control-Allow-Origin': [this.ip],
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      };
+      const options = {
+        url: `${this.ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${this.password}&parm_tipo=M$`,
+        method: "GET",
+        data: {}
+      };
+      this.$axios(options)
+        .then(res => {
+          console.log("Login suceeded!");
+          console.log(res);
         })
-        .catch(error => {
-          console.log(error);
+        .catch(err => {
+          console.error("Login failed." + err);
         });
     }
   }
