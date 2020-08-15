@@ -28,7 +28,7 @@ export const auth = {
                 .get(
                     `${ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${store.getters.getPIN}&parm_tipo=M$`
                 )
-                .then(({ data }) => {
+                .then(() => {
                     console.log('libero')
                 })
                 .catch(error => {
