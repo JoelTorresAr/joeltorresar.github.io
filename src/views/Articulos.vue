@@ -100,6 +100,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn @click="sendKitchen">Imprimir</v-btn>
+              <v-btn @click="sendPreventa">Preventa</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -141,8 +142,6 @@ export default {
     addToMesa(item, index) {
       var userID = this.$store.getters.getUSERID;
       var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${index}&parm_cant=1&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
-      console.log('agrego')
-      console.log(url)
       this.$http
         .get(url)
         .then(({ data }) => {
@@ -163,8 +162,6 @@ export default {
         });
     },
     alterList(item, action) {
-      console.log(item)
-      console.log(action)
       var userID = this.$store.getters.getUSERID;
       var cant = 1
       if(action == 'minus'){
@@ -174,12 +171,10 @@ export default {
          cant = 0
       }
       var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
-      console.log(url)
       this.$http
         .get(url)
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            console.log(data)
             this.articlesEnMesa = data.prod;
           } else {
             this.$swal.fire({
@@ -208,6 +203,28 @@ export default {
               icon: "success",
               confirmButtonText: "Cool"
             });
+          } else {
+            this.$swal.fire({
+              title: "Advertencia!",
+              text: data.msg,
+              icon: "warning",
+              confirmButtonText: "Cool"
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    sendPreventa(){
+      var userID = this.$store.getters.getUSERID;
+      var url = `${this.ip}/?nomFun=tb_cobrar_mesa&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${userID}&parm_tipo=M$`;
+      this.$http
+        .get(url)
+        .then(({ data }) => {
+          if (data.msg == "Ok") {
+            this.$router.push({ name: "Home" });
+            this.articlesEnMesa = data.prod;
           } else {
             this.$swal.fire({
               title: "Advertencia!",

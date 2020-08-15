@@ -13,13 +13,15 @@
               :color="index==pisoActual?'black':'light-green darken-4'"
             >{{item}}</v-btn>
           </v-col>
-          <v-card class="d-flex flex-wrap justify-space-between" color="grey lighten-2" flat tile>
+          <v-card class="d-flex flex-wrap" color="grey lighten-2" flat tile>
             <v-card
               v-for="(item, index) in mesas"
               :key="index"
               :color="item.st_mesa=='L'?'green':'red darken-4'"
               dark
-              class="pa-2 mt-4"
+              height='8rem'
+              width='12rem'
+              class="pa-2 mt-4 ml-4 mr-3"
               @click="newComanda(item,index)"
             >
               <v-card-title class="headline">{{item.nombre}}</v-card-title>
@@ -97,11 +99,19 @@ export default {
     pisoActual: "",
     mesas: "",
     mesaId: "",
-    mesaActual: '',
+    mesaActual: "",
     pin: "",
     dialog: false,
     numcomen: 0
   }),
+  watch:{
+    pisos(val){
+    if (Object.keys(val).length > 0) {
+      var index = Object.keys(val)[0]
+      this.getMesas(index)
+    }
+    }
+  },
   created() {
     this.pisos = JSON.parse(this.$store.getters.getPISOS);
     this.pin = this.$store.getters.getPIN;
@@ -147,8 +157,8 @@ export default {
                   icon: "warning",
                   confirmButtonText: "Cool"
                 });
-              }else{
-               this.$router.push({ name: "Store" });
+              } else {
+                this.$router.push({ name: "Store" });
               }
             }
           })
@@ -165,10 +175,13 @@ export default {
         )
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            console.log(data)
+            console.log(data);
             //this.getMesas(this.pisoActual);
-            this.mesaActual.id_cmd = data.idcmd
-            this.$store.commit("SET_MESA_ACTUAL", JSON.stringify(this.mesaActual));
+            this.mesaActual.id_cmd = data.idcmd;
+            this.$store.commit(
+              "SET_MESA_ACTUAL",
+              JSON.stringify(this.mesaActual)
+            );
             this.$router.push({ name: "Store" });
             this.dialog = false;
           } else {
@@ -198,6 +211,6 @@ export default {
   text-align: center;
 }
 #inspireme--body--index {
-  height: 80vh;
+  height: 70vh;
 }
 </style>
