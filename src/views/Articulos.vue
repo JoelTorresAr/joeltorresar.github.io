@@ -46,7 +46,7 @@
                       </td>
                       <td class="white--text">{{ item.name }}</td>
                       <td>
-                        <v-btn color="red" fab x-small dark  @click="alterList(item,'remove')">
+                        <v-btn color="red" fab x-small dark @click="alterList(item,'remove')">
                           <v-icon>mdi-delete</v-icon>
                         </v-btn>
                       </td>
@@ -55,12 +55,19 @@
                 </template>
               </v-simple-table>
             </v-card-text>
+            <v-card-actions class="justify-space-between">
+              <div>Total:</div>
+              <div>{{total}}</div>
+            </v-card-actions>
           </v-card>
         </v-col>
         <v-col cols="8">
           <v-card id="inspireme" class="grey lighten-2">
             <v-card-title>
-             <v-spacer></v-spacer> <v-btn @click="salir"><v-icon>mdi-arrow-left-bold</v-icon></v-btn>
+              <v-spacer></v-spacer>
+              <v-btn @click="salir">
+                <v-icon>mdi-arrow-left-bold</v-icon>
+              </v-btn>
             </v-card-title>
             <v-card-title>
               <v-slide-group multiple show-arrows>
@@ -99,8 +106,8 @@
               </v-card>
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="sendKitchen">Imprimir</v-btn>
-              <v-btn @click="sendPreuenta">Preventa</v-btn>
+              <v-btn @click="sendKitchen">Enviar a cocina</v-btn>
+              <v-btn @click="sendPrecuenta">Pre-cuenta</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -118,6 +125,7 @@ export default {
     articlesEnMesa: [],
     mesa: "",
     mesaId: "",
+    total: "",
     pin: "",
     dialog: false,
     numcomen: 0,
@@ -136,21 +144,22 @@ export default {
     this.pin = this.$store.getters.getPIN;
     this.ip = this.$store.getters.getIP;
     this.userID = this.$store.getters.getUSERID;
-    this.getArticlesinMesa()
+    this.getArticlesinMesa();
   },
   methods: {
     getArticles(fam) {
       this.articulos = fam.json_prod;
     },
-    getArticlesinMesa(){
-      var url = `${this.ip}/?nomFun=tb_item_3p&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`
+    getArticlesinMesa() {
+      var url = `${this.ip}/?nomFun=tb_item_3p&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            console.log("producto en mesa")
-            console.log(data)
+            console.log("producto en mesa");
+            console.log(data);
             this.articlesEnMesa = data.prod;
+            this.total = data.total;
           } else {
             this.$swal.fire({
               title: "Advertencia!",
@@ -170,8 +179,8 @@ export default {
         .get(url)
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            console.log(data)
             this.articlesEnMesa = data.prod;
+            this.total = data.total;
           } else {
             this.$swal.fire({
               title: "Advertencia!",
@@ -186,38 +195,49 @@ export default {
         });
     },
     alterList(item, action) {
-      var cant = 1
-      if(action == 'minus'){
-        cant = -1
+      var cant = 1;
+      if (action == "minus") {
+        cant = -1;
       }
-      if(action == 'remove'){
-         cant = 0
+      if (action == "remove") {
+        cant = 0;
       }
-      var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
-      this.$http
-        .get(url)
-        .then(({ data }) => {
-          if (data.msg == "Ok") {
-            this.articlesEnMesa = data.prod;
-          } else {
-            this.$swal.fire({
-              title: "Advertencia!",
-              text: data.msg,
-              icon: "warning",
-              confirmButtonText: "Cool"
-            });
-          }
-        })
-        .catch(error => {
-          console.log(error);
+      if (item.print === 1 && action != "plus") {
+        this.$swal.fire({
+          title: "Advertencia!",
+          text: "Esta accion solo la puede ejecutar un administrador",
+          icon: "warning",
+          confirmButtonText: "Cool"
         });
+      } else {
+        var url = `${this.ip}/?nomFun=tb_item&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_prod=${item.idprod}&parm_cant=${cant}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
+        this.$http
+          .get(url)
+          .then(({ data }) => {
+            if (data.msg == "Ok") {
+              this.articlesEnMesa = data.prod;
+              this.total = data.total;
+            } else {
+              this.$swal.fire({
+                title: "Advertencia!",
+                text: data.msg,
+                icon: "warning",
+                confirmButtonText: "Cool"
+              });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
     },
-    sendKitchen(){
-      var url = `http://192.168.0.2:7000/?nomFun=tb_enviar_cmd&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`
+    sendKitchen() {
+      var url = `http://192.168.0.2:7000/?nomFun=tb_enviar_cmd&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {
           if (data.msg == "OK") {
+            this.$store.dispatch("BREAK");
             this.$router.push({ name: "Home" });
             this.$swal.fire({
               title: "Enviado a cocina!",
@@ -238,14 +258,16 @@ export default {
           console.log(error);
         });
     },
-    sendPreuenta(){
-      var url = `${this.ip}/?nomFun=tb_cobrar_mesa&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_dade=0&parm_id_mesero=${this.userID}&parm_tipo=M$`;
+    sendPrecuenta() {
+      var url = `${this.ip}/?nomFun=tb_cobrar_mesa&parm_pin=${this.pin}&parm_piso=20&parm_id_mesas=${this.mesaId}&parm_id_cmd=${this.mesa.id_cmd}&parm_dade=1&parm_id_mesero=${this.userID}&parm_tipo=M$`;
       this.$http
         .get(url)
         .then(({ data }) => {
           if (data.msg == "Ok") {
+            this.$store.dispatch("BREAK");
             this.$router.push({ name: "Home" });
             this.articlesEnMesa = data.prod;
+            this.total = data.total;
           } else {
             this.$swal.fire({
               title: "Advertencia!",
@@ -259,7 +281,8 @@ export default {
           console.log(error);
         });
     },
-    salir(){
+    salir() {
+      this.$store.dispatch("BREAK");
       this.$router.push({ name: "Home" });
     }
   }

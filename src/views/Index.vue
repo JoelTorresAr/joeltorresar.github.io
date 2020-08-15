@@ -19,16 +19,16 @@
               :key="index"
               :color="item.st_mesa=='L'?'green':'red darken-4'"
               dark
-              height='8rem'
-              width='12rem'
+              height="6rem"
+              width="8rem"
               class="pa-2 mt-4 ml-4 mr-3"
               @click="newComanda(item,index)"
             >
-              <v-card-title class="headline">{{item.nombre}}</v-card-title>
-
-              <v-card-actions>
+              <v-card-title>{{item.nombre}}</v-card-title>
+              <v-card-text>
                 <strong>{{item.mesero}}</strong>
-              </v-card-actions>
+                <v-icon class="ml-2">{{getIcon(item)}}</v-icon>
+              </v-card-text>
             </v-card>
           </v-card>
         </v-row>
@@ -70,6 +70,7 @@
                 <v-text-field
                   class="centered-input white--text mt-3"
                   type="number"
+                  min="1"
                   maxlength="2"
                   v-model="numcomen"
                   :counter="2"
@@ -102,14 +103,14 @@ export default {
     mesaActual: "",
     pin: "",
     dialog: false,
-    numcomen: 0
+    numcomen: 1
   }),
-  watch:{
-    pisos(val){
-    if (Object.keys(val).length > 0) {
-      var index = Object.keys(val)[0]
-      this.getMesas(index)
-    }
+  watch: {
+    pisos(val) {
+      if (Object.keys(val).length > 0) {
+        var index = Object.keys(val)[0];
+        this.getMesas(index);
+      }
     }
   },
   created() {
@@ -131,6 +132,29 @@ export default {
           console.log(error);
         });
     },
+    getIcon(item) {
+      var st_cmd = item.st_cmd;
+      var icon = "";
+      switch (st_cmd) {
+        case "1":
+          //Pidio precuenta
+          
+          break;
+        case "3":
+          //Pidio precuenta
+          icon = "fas fa-coins";
+          break;
+
+        case "4":
+          //Esta en preparción
+          icon = "mdi-pot-steam";
+          break;
+
+        default:
+          break;
+      }
+      return icon;
+    },
     newComanda(item, index) {
       this.mesaId = index;
       this.mesaActual = item;
@@ -141,24 +165,33 @@ export default {
         this.dialog = true;
       } else {
         var url = `${this.ip}/?nomFun=tb_revisar_cmd&parm_pin=${this.pin}&parm_piso=${this.pisoActual}&parm_id_cmd=${item.id_cmd}&parm_tipocmd=1&parm_id_mesero=${id}&parm_tipo=M$`;
-        console.log(url);
         this.$http
           .get(url)
           .then(({ data }) => {
             if (data.status !== 0) {
               this.$router.push({ name: "Store" });
             } else {
-              var name = this.$store.getters.getUSERNAME;
-              var msg = `Comanda esta siendo Editada por mesero: ${name}`;
-              if (data.msg != msg) {
+              if (data.msg == "Comanda no existe") {
                 this.$swal.fire({
                   title: "Advertencia!",
                   text: data.msg,
                   icon: "warning",
                   confirmButtonText: "Cool"
                 });
+                this.getMesas(this.pisoActual);
               } else {
-                this.$router.push({ name: "Store" });
+                var name = this.$store.getters.getUSERNAME;
+                var msg = `Comanda esta siendo Editada por mesero: ${name}`;
+                if (data.msg != msg) {
+                  this.$swal.fire({
+                    title: "Advertencia!",
+                    text: data.msg,
+                    icon: "warning",
+                    confirmButtonText: "Cool"
+                  });
+                } else {
+                  this.$router.push({ name: "Store" });
+                }
               }
             }
           })
@@ -175,7 +208,6 @@ export default {
         )
         .then(({ data }) => {
           if (data.msg == "Ok") {
-            console.log(data);
             //this.getMesas(this.pisoActual);
             this.mesaActual.id_cmd = data.idcmd;
             this.$store.commit(

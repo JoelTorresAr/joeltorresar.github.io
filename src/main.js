@@ -7,6 +7,8 @@ import vuetify from "./plugins/vuetify";
 import axios from 'axios'
 Vue.prototype.$http = axios
 import Swal from 'sweetalert2'
+import '@fortawesome/fontawesome-free/css/all.css'
+import '@fortawesome/fontawesome-free/js/all.js'
 /*
 import AxiosPlugin from 'vue-axios-cors';
 

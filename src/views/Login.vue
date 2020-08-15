@@ -1,7 +1,7 @@
 <template>
   <v-row class="lime darken-4">
-    <v-col cols="12" sm="8"></v-col>
-    <v-col cols="12" sm="4">
+    <v-col cols="12" sm="7"></v-col>
+    <v-col cols="12" sm="5">
       <v-card color="rgb(0, 0, 0, 0.4)" dark class="pa-2 mt-4">
         <v-card-title class="text-center headline mt-10">
           <v-text-field
@@ -63,7 +63,6 @@ export default {
       this.password = this.password.substring(0, this.password.length - 1);
     },
     loggin() {
-      this.$http.defaults.withCredentials = true;
       this.$http
         .get(
           `${this.ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${this.password}&parm_tipo=M$`

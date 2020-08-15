@@ -1,3 +1,5 @@
+import store from './index'
+import axios from 'axios'
 export const auth = {
     state: {
         pin: null,
@@ -19,7 +21,21 @@ export const auth = {
             return state.userId;
         },
     },
-    actions: {},
+    actions: {
+        BREAK() {
+            var ip = store.getters.getIP
+            axios
+                .get(
+                    `${ip}/?nomFun=tb_login&parm_cod=Xyfk8Gixnf&parm_new=0&parm_pin=${store.getters.getPIN}&parm_tipo=M$`
+                )
+                .then(({ data }) => {
+                    console.log('libero')
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
+    },
     mutations: {
         SET_PIN(state, value) {
             state.pin = value;
